@@ -1,6 +1,6 @@
 {
   "name": "testcafe-browser-provider-hyperexecute",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "hyperexecute TestCafe browser provider plugin.",
   "repository": "https://github.com/LambdaTest/testcafe-browser-provider-hyperexecute",
   "homepage": "https://github.com/LambdaTest/testcafe-browser-provider-hyperexecute",

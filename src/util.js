@@ -7,18 +7,18 @@ import fs from 'fs';
 import axios from 'axios';
 
 const promisify = fn => pify(fn, Promise);
-const request   = promisify(_request, Promise);
+const request = promisify(_request, Promise);
 
 const PROCESS_ENVIRONMENT = process.env;
 const BASE_URL = 'https://api.lambdatest.com/api/v1';
-const MOBILE_BASE_URL = 'https://beta-api.lambdatest.com/api/v1';
+const MOBILE_BASE_URL = 'https://mobile-api.lambdatest.com/mobile-automation/api/v1';
 const AUTOMATION_BASE_URL = 'https://api.lambdatest.com/automation/api/v1';
 const AUTOMATION_DASHBOARD_URL = 'https://automation.lambdatest.com';
 const AUTOMATION_HUB_URL = process.env.LT_GRID_URL || 'hub.lambdatest.com';
 const MOBILE_AUTOMATION_HUB_URL = process.env.LT_MOBILE_GRID_URL || 'beta-hub.lambdatest.com';
 const LT_AUTH_ERROR = 'Authentication failed. Please assign the correct username and access key to the LT_USERNAME and LT_ACCESS_KEY environment variables.';
 
-const capabilities = { };
+const capabilities = {};
 
 var isTraceEnable = false;
 
@@ -41,7 +41,7 @@ async function requestApi (options) {
 function IsJsonString (str) {
     try {
         return JSON.parse(str);
-    } 
+    }
     catch (e) {
         return false;
     }
@@ -68,34 +68,36 @@ async function _getBrowserList () {
 
 
     //real devices
-    await axios.get(`${MOBILE_BASE_URL}/device?sort=brand&real=true`).then((res) => {
-        const iosDevices = res.data.ios;
+    await axios.get(`${MOBILE_BASE_URL}/real/list`).then((res) => {
 
-        const androidBrands = res.data.android;
+        var iosBrands = res?.data?.ios;
+        var androidBrands = res?.data?.android;
+        var iosDeviceList = [];
+        var androidDeviceList = [];
 
-        const iosDeviceList = [];
+        iosBrands.map((brand) => {
+            const iosDevices = brand?.devices;
 
-        const androidDeviceList = [];
+            iosDevices.map((device) => {
+                if (device?.deviceType === 'real') {
+                    const osVersion = device?.osVersion;
 
-        iosDevices.map((item) => {
-            const osVersion = item.osVersion;
-
-            if (item.deviceType === 'real') {
-                osVersion.map((version) => {
-                    if (version.isRealDevice === 1) iosDeviceList.push(`${item.deviceName}@${version.version}:ios:isReal`);
-                });
-            }
+                    osVersion.map((version) => {
+                        if (device?.isRealDevice === 1) iosDeviceList.push(`${device?.deviceName}@${version?.version}:ios:isReal`);
+                    });
+                }
+            });
         });
 
         androidBrands.map((item) => {
-            const androidDevices = item.devices;
+            const androidDevices = item?.devices;
 
             androidDevices.map((device) => {
-                if (device.deviceType === 'real') {
-                    const osVersion = device.osVersion;
+                if (device?.deviceType === 'real') {
+                    const osVersion = device?.osVersion;
 
                     osVersion.map((version) => {
-                        if (version.isRealDevice === 1) androidDeviceList.push(`${device.deviceName}@${version.version}:android:isReal`);
+                        if (device?.isRealDevice === 1) androidDeviceList.push(`${device?.deviceName}@${version?.version}:android:isReal`);
                     });
                 }
             });
@@ -117,10 +119,10 @@ async function _parseCapabilities (id, capability) {
         let browserName = parseCapabilitiesData.browserName;
 
         const browserVersion = parseCapabilitiesData.browserVersion;
-        const platform = parseCapabilitiesData.platform;        
+        const platform = parseCapabilitiesData.platform;
 
         let lPlatform = platform.toLowerCase();
-        
+
         capabilities[id] = {
             plugin: `${testcafeDetail.name}:${testcafeDetail.version}`
         };
@@ -145,16 +147,16 @@ async function _parseCapabilities (id, capability) {
             capabilities[id].version = browserVersion.toLowerCase();
             capabilities[id].platform = lPlatform;
         }
-        if (PROCESS_ENVIRONMENT.LT_CAPABILITY_PATH) {
-            let additionalCapabilities = { };
+        let additionalCapabilities = {};
 
+        if (PROCESS_ENVIRONMENT.LT_CAPABILITY_PATH) {
             try {
                 additionalCapabilities = await _getAdditionalCapabilities(PROCESS_ENVIRONMENT.LT_CAPABILITY_PATH);
 
             }
             catch (err) {
                 showTrace('Error while adding additionalCapabilities from file : ' + PROCESS_ENVIRONMENT.LT_CAPABILITY_PATH + '  ErrorTrace :', err);
-                additionalCapabilities = { };
+                additionalCapabilities = {};
             }
             capabilities[id] = {
                 ...capabilities[id],
@@ -179,8 +181,13 @@ async function _parseCapabilities (id, capability) {
         if (PROCESS_ENVIRONMENT.LT_SAFARI_COOKIES === true || PROCESS_ENVIRONMENT.LT_SAFARI_COOKIES === 'true') capabilities[id]['safari.cookies'] = true;
         if (PROCESS_ENVIRONMENT.LT_SAFARI_POPUPS === true || PROCESS_ENVIRONMENT.LT_SAFARI_POPUPS === 'true') capabilities[id]['safari.popups'] = true;
         
-        if (browserName && browserName.toLowerCase() === 'firefox' && browserVersion && browserVersion.split('.')[0] > 47 && !('enableCustomTranslation' in capabilities[id]))
-            capabilities[id].enableCustomTranslation = true;
+
+        if (!browserVersion || browserVersion === 'any' && typeof additionalCapabilities[capability] !== 'undefined') {
+            const browserVersionKey = additionalCapabilities[capability]['browserVersion'];
+
+            if (browserName && browserName.trim().toLowerCase() === 'firefox' && browserVersionKey && browserVersionKey.split('.')[0] > 47 && !('enableCustomTranslation' in capabilities[id])) capabilities[id].enableCustomTranslation = true;
+            if (browserName && browserName.trim().toLowerCase() === 'safari' && browserVersionKey && browserVersionKey.split('.')[0] > 11 && !('enableCustomTranslation' in capabilities[id])) capabilities[id].enableCustomTranslation = true;
+        }
 
         // showTrace('Parsed Capabilities ', capabilities[id]);
 
@@ -194,7 +201,6 @@ async function _parseCapabilities (id, capability) {
 }
 async function _updateJobStatus (sessionID, jobResult, jobData, possibleResults) {
     showTrace('Update Test Status called for ', sessionID);
-        
     const testsFailed = jobResult === possibleResults.done ? jobData.total - jobData.passed : 0;
     const jobPassed = jobResult === possibleResults.done && testsFailed === 0;
 
