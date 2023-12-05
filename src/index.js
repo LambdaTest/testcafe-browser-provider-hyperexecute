@@ -7,7 +7,6 @@ const WEB_DRIVER_PING_INTERVAL = 30 * 1000;
 
 wd.configureHttp({
     timeout: 15 * 60 * 1000,
-    
     retries: -1,
 });
 
@@ -17,17 +16,17 @@ export default {
     isMultiBrowser: true,
 
     browserNames: [],
-    
-    openedBrowsers: { },
+
+    openedBrowsers: {},
     async _startBrowser (id, url, capabilities) {
         showTrace('StartBrowser Initiated for ', id);
-        console.log('capabilites', capabilities);
+        console.log('capabilities', capabilities);
         let webDriver = await wd.promiseChainRemote(`https://${PROCESS_ENVIRONMENT.LT_USERNAME}:${PROCESS_ENVIRONMENT.LT_ACCESS_KEY}@${AUTOMATION_HUB_URL}:443/wd/hub`, 443);
 
         if (capabilities.isRealMobile) webDriver = await wd.promiseChainRemote(`https://${PROCESS_ENVIRONMENT.LT_USERNAME}:${PROCESS_ENVIRONMENT.LT_ACCESS_KEY}@${MOBILE_AUTOMATION_HUB_URL}:443/wd/hub`, 443);
 
         const pingWebDriver = () => ping(webDriver);
-        
+
         showTrace('webDriver ', webDriver);
         showTrace('pingWebDriver', pingWebDriver);
 
@@ -53,7 +52,7 @@ export default {
     },
     async _takeScreenshot (id, screenshotPath) {
         const base64Data = await this.openedBrowsers[id].takeScreenshot();
-        
+
         await _saveFile(screenshotPath, base64Data);
     },
     // Required - must be implemented
@@ -63,7 +62,7 @@ export default {
             throw new Error(LT_AUTH_ERROR);
 
         const capabilities = await _parseCapabilities(id, browserName);
-        
+
         if (capabilities instanceof Error) {
             showTrace('openBrowser error on  _parseCapabilities', capabilities);
             this.dispose();
@@ -71,7 +70,7 @@ export default {
         }
         await this._startBrowser(id, pageUrl, capabilities);
         const sessionUrl = ` ${AUTOMATION_DASHBOARD_URL}/logs/?sessionID=${this.openedBrowsers[id].sessionID} `;
-        
+
         showTrace('sessionURL', sessionUrl);
 
         this.setUserAgentMetaInfo(id, sessionUrl);
@@ -94,8 +93,8 @@ export default {
                 showTrace('SessionID not found for ', id);
                 showTrace(this.openedBrowsers[id]);
             }
-        } 
-        else 
+        }
+        else
             showTrace('Browser not found in OPEN STATE for ', id);
     },
 
@@ -112,18 +111,18 @@ export default {
     async isValidBrowserName (/* browserName */) {
         return true;
     },
-    
+
 
     // Extra methods
     async resizeWindow (id, width, height) {
-        const _windowHandle = await this.openedBrowsers[id].windowHandle();
-        
+        const _windowHandle = await this.openedBrowsers[id].windowHandles();
+
         await this.openedBrowsers[id].windowSize(_windowHandle, width, height);
     },
 
     async maximizeWindow (id) {
-        const _windowHandle = await this.openedBrowsers[id].windowHandle();
-        
+        const _windowHandle = await this.openedBrowsers[id].windowHandles();
+
         await this.openedBrowsers[id].maximize(_windowHandle);
     },
 
@@ -145,7 +144,7 @@ function handlePingError (err, res) {
     if (err) {
         showTrace('ping error :');
         showTrace(err);
-    } 
+    }
     else {
         showTrace('ignore ping response :');
         showTrace(res);
