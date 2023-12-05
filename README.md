@@ -7,8 +7,13 @@ This plugin integrates [TestCafe](http://devexpress.github.io/testcafe) with the
 ## Install
 
 ```sh
-$ npm install testcafe-browser-provider-hyperexecute
+$ npm install -g testcafe
 ```
+
+```sh
+$ npm install -g testcafe-browser-provider-hyperexecute
+```
+
 
 ## Usage
 Before using this plugin, save the LambdaTest username and access key to environment variables `LT_USERNAME` and `LT_ACCESS_KEY`, as described in [LambdaTest Documentation](https://www.lambdatest.com/support/docs/using-environment-variables-for-authentication-credentials).
@@ -50,6 +55,18 @@ testCafe
     .src('path/to/test/file.js')
     .browsers('hyperexecute:Chrome@74.0:Windows 8')
     .run();
+```
+
+## To run your TestCafe tests on Hyperexecute
+
+- Download the Hyperexecute binary based on your operating system from [here](https://www.lambdatest.com/support/docs/hyperexecute-cli-run-tests-on-hyperexecute-grid/) and place it in the root of your project
+- Give the necessary permissions 
+```sh
+$ chmod +x hyperexecute
+````
+- Run the tests on hyperexecute 
+```sh
+$ ./hyperexecute --user <YOUR_USERNAME> --key <YOUR_ACCESSKEY> --config /path/to/your/hyperexecute.yml
 ```
 
 ## Build Plugin Locally (Development Mode)
