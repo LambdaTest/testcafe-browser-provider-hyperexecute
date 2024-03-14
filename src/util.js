@@ -1,10 +1,10 @@
 'use strict';
-import _request from 'request';
-import Promise from 'pinkie';
-import pify from 'pify';
+import axios from 'axios';
 import parseCapabilities from 'desired-capabilities';
 import fs from 'fs';
-import axios from 'axios';
+import pify from 'pify';
+import Promise from 'pinkie';
+import _request from 'request';
 
 const promisify = fn => pify(fn, Promise);
 const request = promisify(_request, Promise);
@@ -15,7 +15,7 @@ const MOBILE_BASE_URL = 'https://mobile-api.lambdatest.com/mobile-automation/api
 const AUTOMATION_BASE_URL = 'https://api.lambdatest.com/automation/api/v1';
 const AUTOMATION_DASHBOARD_URL = 'https://automation.lambdatest.com';
 const AUTOMATION_HUB_URL = process.env.LT_GRID_URL || 'hub.lambdatest.com';
-const MOBILE_AUTOMATION_HUB_URL = process.env.LT_MOBILE_GRID_URL || 'beta-hub.lambdatest.com';
+const MOBILE_AUTOMATION_HUB_URL = process.env.LT_MOBILE_GRID_URL || 'mobile-hub.lambdatest.com';
 const LT_AUTH_ERROR = 'Authentication failed. Please assign the correct username and access key to the LT_USERNAME and LT_ACCESS_KEY environment variables.';
 
 const capabilities = {};
@@ -25,7 +25,7 @@ var isTraceEnable = false;
 if (PROCESS_ENVIRONMENT.LT_ENABLE_TRACE)
     isTraceEnable = true;
 
-async function requestApi (options) {
+async function requestApi(options) {
     const response = await request(options);
 
     try {
@@ -38,7 +38,7 @@ async function requestApi (options) {
     }
 }
 
-function IsJsonString (str) {
+function IsJsonString(str) {
     try {
         return JSON.parse(str);
     }
@@ -47,7 +47,7 @@ function IsJsonString (str) {
     }
 }
 
-async function _getBrowserList () {
+async function _getBrowserList() {
     let browserList = [];
     const osList = await requestApi(`${BASE_URL}/capability?format=array`);
 
@@ -109,7 +109,7 @@ async function _getBrowserList () {
     return browserList;
 }
 
-async function _parseCapabilities (id, capability) {
+async function _parseCapabilities(id, capability) {
     try {
         const testcafeDetail = require('../package.json');
 
@@ -180,7 +180,7 @@ async function _parseCapabilities (id, capability) {
         if (capabilities[id].platform === 'any') delete capabilities[id].platform;
         if (PROCESS_ENVIRONMENT.LT_SAFARI_COOKIES === true || PROCESS_ENVIRONMENT.LT_SAFARI_COOKIES === 'true') capabilities[id]['safari.cookies'] = true;
         if (PROCESS_ENVIRONMENT.LT_SAFARI_POPUPS === true || PROCESS_ENVIRONMENT.LT_SAFARI_POPUPS === 'true') capabilities[id]['safari.popups'] = true;
-        
+
 
         if (!browserVersion || browserVersion === 'any' && typeof additionalCapabilities[capability] !== 'undefined') {
             const browserVersionKey = additionalCapabilities[capability]['browserVersion'];
@@ -199,7 +199,7 @@ async function _parseCapabilities (id, capability) {
         return new Error(err);
     }
 }
-async function _updateJobStatus (sessionID, jobResult, jobData, possibleResults) {
+async function _updateJobStatus(sessionID, jobResult, jobData, possibleResults) {
     showTrace('Update Test Status called for ', sessionID);
     const testsFailed = jobResult === possibleResults.done ? jobData.total - jobData.passed : 0;
     const jobPassed = jobResult === possibleResults.done && testsFailed === 0;
@@ -237,14 +237,14 @@ async function _updateJobStatus (sessionID, jobResult, jobData, possibleResults)
 
     return await requestApi(options);
 }
-function _saveFile (screenshotPath, base64Data) {
+function _saveFile(screenshotPath, base64Data) {
     return new Promise((resolve, reject) => {
         fs.writeFile(screenshotPath, base64Data, 'base64', (err) =>
             err ? reject(err) : resolve()
         );
     });
 }
-function _getAdditionalCapabilities (filename) {
+function _getAdditionalCapabilities(filename) {
     return new Promise((resolve, reject) => {
         fs.readFile(filename, 'utf8', (err, data) =>
             err ? reject(err) : resolve(JSON.parse(data))
@@ -252,7 +252,7 @@ function _getAdditionalCapabilities (filename) {
     });
 }
 
-function showTrace (message, data) {
+function showTrace(message, data) {
     /*eslint no-console: ["error", { allow: ["warn", "log", "error"] }] */
     if (isTraceEnable) {
         console.log(message);
