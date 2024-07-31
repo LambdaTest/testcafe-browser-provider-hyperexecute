@@ -25,7 +25,7 @@ var isTraceEnable = false;
 if (PROCESS_ENVIRONMENT.LT_ENABLE_TRACE)
     isTraceEnable = true;
 
-async function requestApi (options) {
+async function requestApi(options) {
     const response = await request(options);
 
     try {
@@ -38,7 +38,7 @@ async function requestApi (options) {
     }
 }
 
-function IsJsonString (str) {
+function IsJsonString(str) {
     try {
         return JSON.parse(str);
     }
@@ -47,7 +47,7 @@ function IsJsonString (str) {
     }
 }
 
-async function _getBrowserList () {
+async function _getBrowserList() {
     let browserList = [];
     const osList = await requestApi(`${BASE_URL}/capability?format=array`);
 
@@ -109,7 +109,7 @@ async function _getBrowserList () {
     return browserList;
 }
 
-async function _parseCapabilities (id, capability) {
+async function _parseCapabilities(id, capability) {
     try {
         const testcafeDetail = require('../package.json');
 
@@ -131,6 +131,7 @@ async function _parseCapabilities (id, capability) {
             browserName = capability.split('@')[0];
             lPlatform = platform.split(':')[0];
             capabilities[id].isRealMobile = true;
+            if (!capabilities[id].appiumVersion) capabilities[id].appiumVersion = 'latest';
             if (process.env.LT_VISUAL) capabilities[id].visual = true;
         }
 
@@ -164,11 +165,17 @@ async function _parseCapabilities (id, capability) {
             };
         }
 
+        if (capabilities[id].appiumVersion || capabilities[id]['LT:Options']?.appiumVersion || capabilities[id]['lt:options']?.appiumVersion) {
+            capabilities[id].allowW3C = true;
+            capabilities[id].w3cPrefix = 'appium';
+        }
+
         if (PROCESS_ENVIRONMENT.LT_BUILD) capabilities[id].build = PROCESS_ENVIRONMENT.LT_BUILD;
         capabilities[id].name = PROCESS_ENVIRONMENT.LT_TEST_NAME || capabilities[id].name || `TestCafe test run ${id}`;
 
         if (PROCESS_ENVIRONMENT.LT_RESOLUTION) capabilities[id].resolution = PROCESS_ENVIRONMENT.LT_RESOLUTION;
         if (PROCESS_ENVIRONMENT.LT_SELENIUM_VERSION) capabilities[id]['selenium_version'] = PROCESS_ENVIRONMENT.LT_SELENIUM_VERSION;
+        if (PROCESS_ENVIRONMENT.LT_APPIUM_VERSION) capabilities[id]['appiumVersion'] = PROCESS_ENVIRONMENT.LT_APPIUM_VERSION;
         if (PROCESS_ENVIRONMENT.LT_CONSOLE) capabilities[id].console = true;
         if (PROCESS_ENVIRONMENT.LT_NETWORK) capabilities[id].network = true;
         if (PROCESS_ENVIRONMENT.LT_VIDEO) capabilities[id].video = true;
@@ -199,7 +206,7 @@ async function _parseCapabilities (id, capability) {
         return new Error(err);
     }
 }
-async function _updateJobStatus (sessionID, jobResult, jobData, possibleResults) {
+async function _updateJobStatus(sessionID, jobResult, jobData, possibleResults) {
     showTrace('Update Test Status called for ', sessionID);
     const testsFailed = jobResult === possibleResults.done ? jobData.total - jobData.passed : 0;
     const jobPassed = jobResult === possibleResults.done && testsFailed === 0;
@@ -237,14 +244,14 @@ async function _updateJobStatus (sessionID, jobResult, jobData, possibleResults)
 
     return await requestApi(options);
 }
-function _saveFile (screenshotPath, base64Data) {
+function _saveFile(screenshotPath, base64Data) {
     return new Promise((resolve, reject) => {
         fs.writeFile(screenshotPath, base64Data, 'base64', (err) =>
             err ? reject(err) : resolve()
         );
     });
 }
-function _getAdditionalCapabilities (filename) {
+function _getAdditionalCapabilities(filename) {
     return new Promise((resolve, reject) => {
         fs.readFile(filename, 'utf8', (err, data) =>
             err ? reject(err) : resolve(JSON.parse(data))
@@ -252,7 +259,7 @@ function _getAdditionalCapabilities (filename) {
     });
 }
 
-function showTrace (message, data) {
+function showTrace(message, data) {
     /*eslint no-console: ["error", { allow: ["warn", "log", "error"] }] */
     if (isTraceEnable) {
         console.log(message);

@@ -102,6 +102,7 @@ Use the following environment variables to set additional configuration options:
  - `LT_PROXY_PASS` - Password for the USERNAME option.
  - `LT_DIR` - Path of the local folder you want to test.
  - `LT_SELENIUM_VERSION` - Browser specific capability (Not for Real Devices)
+ - `LT_APPIUM_VERSION` - Real Device specific capability
  - `LT_CONSOLE` - true or false.
  - `LT_NETWORK` - true or false.
  - `LT_VIDEO` - true or false.
