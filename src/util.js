@@ -131,6 +131,7 @@ async function _parseCapabilities (id, capability) {
             browserName = capability.split('@')[0];
             lPlatform = platform.split(':')[0];
             capabilities[id].isRealMobile = true;
+            if (!capabilities[id].appiumVersion) capabilities[id].appiumVersion = 'latest';
             if (process.env.LT_VISUAL) capabilities[id].visual = true;
         }
 
@@ -164,11 +165,17 @@ async function _parseCapabilities (id, capability) {
             };
         }
 
+        if (capabilities[id].appiumVersion || capabilities[id]['LT:Options']?.appiumVersion || capabilities[id]['lt:options']?.appiumVersion) {
+            capabilities[id].allowW3C = true;
+            capabilities[id].w3cPrefix = 'appium';
+        }
+
         if (PROCESS_ENVIRONMENT.LT_BUILD) capabilities[id].build = PROCESS_ENVIRONMENT.LT_BUILD;
         capabilities[id].name = PROCESS_ENVIRONMENT.LT_TEST_NAME || capabilities[id].name || `TestCafe test run ${id}`;
 
         if (PROCESS_ENVIRONMENT.LT_RESOLUTION) capabilities[id].resolution = PROCESS_ENVIRONMENT.LT_RESOLUTION;
         if (PROCESS_ENVIRONMENT.LT_SELENIUM_VERSION) capabilities[id]['selenium_version'] = PROCESS_ENVIRONMENT.LT_SELENIUM_VERSION;
+        if (PROCESS_ENVIRONMENT.LT_APPIUM_VERSION) capabilities[id]['appiumVersion'] = PROCESS_ENVIRONMENT.LT_APPIUM_VERSION;
         if (PROCESS_ENVIRONMENT.LT_CONSOLE) capabilities[id].console = true;
         if (PROCESS_ENVIRONMENT.LT_NETWORK) capabilities[id].network = true;
         if (PROCESS_ENVIRONMENT.LT_VIDEO) capabilities[id].video = true;
