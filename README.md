@@ -1,4 +1,4 @@
-# npm Plugin For TestCafe Integration With TestMu AI HyperExecute
+# npm Plugin For TestCafe Integration With HyperExecute - TestMu AI (Formerly LambdaTest)
 
 [![Testcafe Health Check](https://github.com/LambdaTest/testcafe-browser-provider-hyperexecute/actions/workflows/main.yml/badge.svg)](https://github.com/LambdaTest/testcafe-browser-provider-hyperexecute/actions/workflows/main.yml)
 
