@@ -78,8 +78,8 @@ $ sudo npm link
 
 Use the following environment variables to set additional configuration options:
 
- - `LT_TEST_NAME` - Test name on LambdaTest.
- - `LT_BUILD` - Build name on LambdaTest.
+ - `LT_TEST_NAME` - Test name on TestMu AI (Formerly LambdaTest).
+ - `LT_BUILD` - Build name on TestMu AI (Formerly LambdaTest).
  - `LT_CAPABILITY_PATH` - Path to a file which contains additional capability options as JSON file (eg. config.json)
 
     ```js
